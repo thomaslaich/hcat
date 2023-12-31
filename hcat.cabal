@@ -2,15 +2,15 @@ cabal-version:      2.4
 name:               hcat
 version:            0.1.0.0
 license:            MIT
-copyright:          2022 Sridhar Ratnakumar
-maintainer:         srid@srid.ca
-author:             Sridhar Ratnakumar
+copyright:          2023 Thomas Laich
+maintainer:         thomaslaich@gmail.com
+author:             Thomas Laich
 category:           Web
-homepage:           https://srid.ca/hcat
+homepage:           https://www.github.com/thomaslaich/hcat
 
 -- TODO: Before hackage release.
 -- A short (one-line) description of the package.
-synopsis:           A template for Haskell projects using Nix
+synopsis:           A simple command line utility for paging through a file (same as cat but written in Haskell)
 
 -- A longer description of the package.
 -- description:
@@ -28,10 +28,10 @@ common shared
     -Wmissing-deriving-strategies -Wunused-foralls -Wunused-foralls
     -fprint-explicit-foralls -fprint-explicit-kinds
 
-  mixins:
-    base hiding (Prelude),
-    relude (Relude as Prelude, Relude.Container.One),
-    relude
+  -- mixins:
+    -- base hiding (Prelude),
+    -- relude (Relude as Prelude, Relude.Container.One),
+    -- relude
 
   default-extensions:
     BangPatterns
@@ -84,14 +84,25 @@ common shared
     , mtl
     , optics-core
     , profunctors
-    , relude        >=1.0
+    -- , relude        >=1.0
     , shower
     , time
     , with-utf8
 
+  hs-source-dirs:     src, app
+  default-language:   Haskell2010
+
+library
+  import:             shared
+  hs-source-dirs:     src
+  exposed-modules:    HCat
   hs-source-dirs:     src
   default-language:   Haskell2010
 
 executable hcat
-  import:  shared
-  main-is: Main.hs
+  import:             shared
+  main-is:            Main.hs
+  hs-source-dirs:     app
+  build-depends:      base, hcat
+  default-language:   Haskell2010
+
