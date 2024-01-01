@@ -65,6 +65,7 @@ common shared
     PolyKinds
     PostfixOperators
     RankNTypes
+    RecordWildCards
     ScopedTypeVariables
     StandaloneDeriving
     StandaloneKindSignatures
@@ -97,6 +98,7 @@ common shared
 
 library
   import:             shared
+  build-depends:      base
   hs-source-dirs:     src
   exposed-modules:    HCat
   hs-source-dirs:     src
