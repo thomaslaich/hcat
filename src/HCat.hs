@@ -5,7 +5,6 @@ import Data.ByteString qualified as BS
 import Data.Text qualified as Text
 import Data.Text.IO qualified as TextIO
 import Data.Time.Clock qualified as Clock
-import Data.Time.Clock.POSIX qualified as PosixClock
 import Data.Time.Format qualified as TimeFormat
 import System.Directory qualified as Directory
 import System.Environment qualified as Env
@@ -15,7 +14,7 @@ import System.Info qualified as SystemInfo
 import System.Process (readProcess)
 import Text.Printf
 
-data ContinueCancel = Continue | Cancel deriving (Eq, Show)
+data ContinueCancel = Continue | Cancel deriving stock (Eq, Show)
 
 data FileInfo = FileInfo
   { filePath :: FilePath
@@ -25,13 +24,13 @@ data FileInfo = FileInfo
   , fileWritable :: Bool
   , fileExecutable :: Bool
   }
-  deriving (Show)
+  deriving stock (Show)
 
 data ScreenDimensions = ScreenDimensions
   { screenRows :: Int
   , screenColumns :: Int
   }
-  deriving (Show)
+  deriving stock (Show)
 
 getFileInfo :: FilePath -> IO FileInfo
 getFileInfo filePath = do
@@ -91,12 +90,12 @@ getTerminalSize =
     tputScreenDimensions :: IO ScreenDimensions
     tputScreenDimensions =
       readProcess "tput" ["lines"] ""
-        >>= \lines ->
+        >>= \lines' ->
           readProcess "tput" ["cols"] ""
             >>= \cols ->
-              let lines' = read $ init lines
+              let lines'' = read $ init lines'
                   cols' = read $ init cols
-               in return $ ScreenDimensions lines' cols'
+               in return $ ScreenDimensions lines'' cols'
 
 getContinue :: IO ContinueCancel
 getContinue = do

@@ -2,15 +2,15 @@ cabal-version:      2.4
 name:               hcat
 version:            0.1.0.0
 license:            MIT
-copyright:          2023 Thomas Laich
+copyright:          2024 Thomas Laich
 maintainer:         thomaslaich@gmail.com
 author:             Thomas Laich
 category:           Web
 homepage:           https://www.github.com/thomaslaich/hcat
 
--- TODO: Before hackage release.
 -- A short (one-line) description of the package.
-synopsis:           A simple command line utility for paging through a file (same as cat but written in Haskell)
+synopsis:
+  A simple command line utility for paging through a file (same as cat but written in Haskell)
 
 -- A longer description of the package.
 -- description:
@@ -22,92 +22,30 @@ extra-source-files:
   LICENSE
   README.md
 
-common shared
-  ghc-options:
-    -Wall -Wincomplete-record-updates -Wincomplete-uni-patterns
-    -Wmissing-deriving-strategies -Wunused-foralls -Wunused-foralls
-    -fprint-explicit-foralls -fprint-explicit-kinds
-
-  -- mixins:
-  --   base hiding (Prelude),
-  --   relude (Relude as Prelude, Relude.Container.One),
-  --   relude
-
-  default-extensions:
-    BangPatterns
-    ConstraintKinds
-    DataKinds
-    DeriveDataTypeable
-    DeriveFoldable
-    DeriveFunctor
-    DeriveGeneric
-    DeriveLift
-    DeriveTraversable
-    DerivingStrategies
-    DerivingVia
-    EmptyCase
-    EmptyDataDecls
-    EmptyDataDeriving
-    ExistentialQuantification
-    ExplicitForAll
-    FlexibleContexts
-    FlexibleInstances
-    GADTSyntax
-    GeneralisedNewtypeDeriving
-    ImportQualifiedPost
-    KindSignatures
-    LambdaCase
-    MultiParamTypeClasses
-    MultiWayIf
-    NoStarIsType
-    NumericUnderscores
-    OverloadedStrings
-    PolyKinds
-    PostfixOperators
-    RankNTypes
-    RecordWildCards
-    ScopedTypeVariables
-    StandaloneDeriving
-    StandaloneKindSignatures
-    TupleSections
-    TypeApplications
-    TypeFamilies
-    TypeOperators
-    ViewPatterns
-
+library
+  hs-source-dirs:     src
   build-depends:
-    , aeson
-    , async
-    , base          >=4.13.0.0 && <4.18.0.0.0
+    , base
     , bytestring
-    , data-default
     , directory
-    , filepath
-    , mtl
-    , optics-core
     , process
-    , profunctors
-    -- , relude        >=1.0
-    , shower
     , text
     , time
-    , with-utf8
 
-  hs-source-dirs:     src, app
-  default-language:   Haskell2010
+  default-extensions:
+    DerivingStrategies
+    ImportQualifiedPost
+    RecordWildCards
 
-library
-  import:             shared
-  build-depends:      base
-  hs-source-dirs:     src
   exposed-modules:    HCat
   hs-source-dirs:     src
   default-language:   Haskell2010
 
 executable hcat
-  import:             shared
-  main-is:            Main.hs
-  hs-source-dirs:     app
-  build-depends:      base, hcat
-  default-language:   Haskell2010
+  main-is:          Main.hs
+  hs-source-dirs:   app
+  build-depends:
+    , base
+    , hcat
 
+  default-language: Haskell2010
