@@ -14,7 +14,7 @@ import System.Info qualified as SystemInfo
 import System.Process (readProcess)
 import Text.Printf
 
-data ContinueCancel = Continue | Cancel deriving stock (Eq, Show)
+data Action = NextPage | PrevPage | NextLine | PrevLine | Cancel deriving stock (Eq, Show)
 
 data FileInfo = FileInfo
   { filePath :: FilePath
@@ -97,13 +97,16 @@ getTerminalSize =
                   cols' = read $ init cols
                in return $ ScreenDimensions lines'' cols'
 
-getContinue :: IO ContinueCancel
+getContinue :: IO Action
 getContinue = do
   hSetBuffering stdin NoBuffering
   hSetEcho stdin False
   input <- getChar
   case input of
-    ' ' -> return Continue
+    ' ' -> return NextPage
+    'u' -> return PrevPage
+    'j' -> return NextLine
+    'k' -> return PrevLine
     'q' -> return Cancel
     _ -> getContinue
 
@@ -144,30 +147,28 @@ wordWrap lineLength lineText
            in (wrappedLine, Text.tail rest)
       | otherwise = softWrap hardwrappedText (textIndex - 1)
 
-paginate :: ScreenDimensions -> FileInfo -> Text.Text -> [Text.Text]
-paginate (ScreenDimensions rows columns) finfo text =
-  let
-    rows' = rows - 1
-    wrappedLines = concatMap (wordWrap columns) (Text.lines text)
-    pages = map (Text.unlines . padTo rows') $ groupsOf rows' wrappedLines
-    pageCount = length pages
-    statusLines = map (formatFileInfo finfo columns pageCount) [1 .. pageCount]
-   in
-    zipWith (<>) pages statusLines
+showPage :: ScreenDimensions -> FileInfo -> Text.Text -> Int -> IO ()
+showPage (ScreenDimensions rows columns) finfo text offset = do
+  let rows' = rows - 1
+  let wrappedLines = concatMap (wordWrap columns) (Text.lines text)
+  let pages = map (Text.unlines . padTo rows') $ groupsOf rows' wrappedLines
+  let page = Text.unlines $ take rows' $ drop offset wrappedLines
+  let pageCount = length pages
+  let statusLine = formatFileInfo finfo columns pageCount $ ((offset - 1) `div` rows) + 2
+  let pageWithStatus = page <> statusLine
+  clearScreen
+  TextIO.putStrLn pageWithStatus
+  input <- getContinue
+  case input of
+    NextPage -> showPage (ScreenDimensions rows columns) finfo text $ min (offset + rows') (length wrappedLines - rows')
+    PrevPage -> showPage (ScreenDimensions rows columns) finfo text $ max (offset - rows') 0
+    NextLine -> showPage (ScreenDimensions rows columns) finfo text $ min (offset + 1) (length wrappedLines - rows')
+    PrevLine -> showPage (ScreenDimensions rows columns) finfo text $ max (offset - 1) 0
+    Cancel -> return ()
   where
     padTo :: Int -> [Text.Text] -> [Text.Text]
     padTo lineCount rowsToPad =
       take lineCount $ rowsToPad <> repeat ""
-
-showPages :: [Text.Text] -> IO ()
-showPages [] = return ()
-showPages (page : pages) = do
-  clearScreen
-  TextIO.putStrLn page
-  input <- getContinue
-  case input of
-    Continue -> showPages pages
-    Cancel -> return ()
 
 clearScreen :: IO ()
 clearScreen = BS.putStr "\^[[1J\^[[1;1H"
@@ -179,5 +180,4 @@ runHCat = do
   termSize <- getTerminalSize
   hSetBuffering stdin NoBuffering
   finfo <- getFileInfo targetFilePath
-  let pages = paginate termSize finfo contents
-  showPages pages
+  showPage termSize finfo contents 0
