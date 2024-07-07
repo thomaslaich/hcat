@@ -14,7 +14,17 @@ import System.Info qualified as SystemInfo
 import System.Process (readProcess)
 import Text.Printf
 
-data Action = NextPage | PrevPage | NextLine | PrevLine | Cancel deriving stock (Eq, Show)
+data Action
+  = FirstPage
+  | LastPage
+  | NextPage
+  | PrevPage
+  | NextBlock
+  | PrevBlock
+  | NextLine
+  | PrevLine
+  | Cancel
+  deriving stock (Eq, Show)
 
 data FileInfo = FileInfo
   { filePath :: FilePath
@@ -103,11 +113,15 @@ getContinue = do
   hSetEcho stdin False
   input <- getChar
   case input of
+    'g' -> return FirstPage
+    'G' -> return LastPage
     ' ' -> return NextPage
     'u' -> return PrevPage
     'j' -> return NextLine
     'k' -> return PrevLine
     'q' -> return Cancel
+    '\EOT' -> return NextBlock -- Control+d
+    '\NAK' -> return PrevBlock -- Control+u
     _ -> getContinue
 
 handleArgs :: IO (Either String FilePath)
@@ -160,8 +174,12 @@ showPage (ScreenDimensions rows columns) finfo text offset = do
   TextIO.putStrLn pageWithStatus
   input <- getContinue
   case input of
+    FirstPage -> showPage (ScreenDimensions rows columns) finfo text 0
+    LastPage -> showPage (ScreenDimensions rows columns) finfo text $ length wrappedLines - rows'
     NextPage -> showPage (ScreenDimensions rows columns) finfo text $ min (offset + rows') (length wrappedLines - rows')
     PrevPage -> showPage (ScreenDimensions rows columns) finfo text $ max (offset - rows') 0
+    NextBlock -> showPage (ScreenDimensions rows columns) finfo text $ min (offset + 20) (length wrappedLines - rows')
+    PrevBlock -> showPage (ScreenDimensions rows columns) finfo text $ max (offset - 20) 0
     NextLine -> showPage (ScreenDimensions rows columns) finfo text $ min (offset + 1) (length wrappedLines - rows')
     PrevLine -> showPage (ScreenDimensions rows columns) finfo text $ max (offset - 1) 0
     Cancel -> return ()
