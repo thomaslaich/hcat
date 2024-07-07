@@ -24,10 +24,6 @@ extra-source-files:
 
 library
   hs-source-dirs:     src
-  ghc-options:
-    -Wall -Wincomplete-record-updates -Wincomplete-uni-patterns
-    -Wmissing-deriving-strategies -Wunused-foralls -Wunused-foralls
-    -fprint-explicit-foralls -fprint-explicit-kinds
 
   build-depends:
     , base

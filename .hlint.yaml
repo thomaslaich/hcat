@@ -1,4 +1,2 @@
 # Repo-specific hlint rules go here:
 - ignore: {name: Use camelCase}
-- ignore: {name: Data types with non-strict fields}
-- ignore: {name: Pattern matching on '_'}
