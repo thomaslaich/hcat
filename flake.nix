@@ -72,6 +72,7 @@
             programs.nixfmt.enable = true;
             programs.cabal-fmt.enable = true;
             programs.hlint.enable = true;
+            programs.yamlfmt.enable = true;
 
             # We use fourmolu
             programs.ormolu.package = pkgs.haskellPackages.fourmolu;

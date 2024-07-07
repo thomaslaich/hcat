@@ -101,7 +101,7 @@ getContinue :: IO ContinueCancel
 getContinue = do
   hSetBuffering stdin NoBuffering
   hSetEcho stdin False
-  input <- hGetChar stdin
+  input <- getChar
   case input of
     ' ' -> return Continue
     'q' -> return Cancel
